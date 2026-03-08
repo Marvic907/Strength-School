@@ -105,6 +105,7 @@ If your deployed link opens GitHub instead of the app, follow these exact steps:
 
 ### If the workflow fails on install
 - This project depends on npm registry access. If your organization blocks npm packages, ask your admin to allow `registry.npmjs.org`.
+- This workflow uses `npm install` and does not require a lockfile. If you later add `package-lock.json`, you can re-enable npm cache in the workflow for faster builds.
 
 
 ## Why you are seeing "Choose a workflow"
