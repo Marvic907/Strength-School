@@ -105,3 +105,18 @@ If your deployed link opens GitHub instead of the app, follow these exact steps:
 
 ### If the workflow fails on install
 - This project depends on npm registry access. If your organization blocks npm packages, ask your admin to allow `registry.npmjs.org`.
+
+
+## Why you are seeing "Choose a workflow"
+That screen means GitHub cannot find a workflow file on your **default branch** yet.
+
+### Quick fix (very simple)
+1. Go to **Code** tab and check this file exists on GitHub: `.github/workflows/deploy-web-preview.yml`
+2. If not there, push your latest branch to GitHub.
+3. Open **Settings → Branches** and confirm your default branch (usually `main` or `work`).
+4. Make sure the workflow file exists on that default branch.
+5. Go to **Actions** and run **Deploy Web Preview (GitHub Pages)**.
+
+### One-click checks
+- If Actions tab still shows "Choose a workflow", the workflow file is not on default branch yet.
+- If Actions runs but Pages link is blank, set **Settings → Pages → Source = GitHub Actions**.
