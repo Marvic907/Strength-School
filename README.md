@@ -143,3 +143,5 @@ I added two fixes in code:
    - `Upload Pages artifact` passed
    - `Deploy to GitHub Pages` passed
 4. Hard refresh browser (`Ctrl+Shift+R` / `Cmd+Shift+R`).
+
+- If workflow shows missing web dependencies, ensure `react-native-web`, `react-dom`, and `@expo/metro-runtime` are present in `package.json` (already included in this repo).
