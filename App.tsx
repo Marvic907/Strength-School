@@ -61,20 +61,28 @@ export default function App() {
   const [errors, setErrors] = useState<Errors>({});
   const [records, setRecords] = useState<OnboardingRecord[]>([]);
   const [tab, setTab] = useState<'intake' | 'records'>('intake');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pdfForRecordId, setPdfForRecordId] = useState<string | null>(null);
 
   useEffect(() => {
-    loadRecords().then(setRecords);
+    loadRecords()
+      .then((data) =>
+        setRecords(
+          [...data].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+        )
+      )
+      .catch(() => Alert.alert('Load failed', 'Could not read saved records on this device.'));
   }, []);
 
   const handleText = (key: keyof OnboardingFormInput, value: string) => {
     setForm((current) => ({ ...current, [key]: key === 'participantAge' ? Number(value || 0) : value }));
   };
 
-  const validate = (): boolean => {
+  const validate = (): OnboardingFormInput | null => {
     const parsed = onboardingSchema.safeParse(form);
     if (parsed.success) {
       setErrors({});
-      return true;
+      return parsed.data;
     }
     const fieldErrors: Errors = {};
     parsed.error.errors.forEach((issue) => {
@@ -83,66 +91,86 @@ export default function App() {
     });
     setErrors(fieldErrors);
     Alert.alert('Validation failed', 'Please complete required safety-critical sections.');
-    return false;
+    return null;
   };
 
   const toRecord = useMemo(
-    () => ():
+    () => (input: OnboardingFormInput):
       OnboardingRecord => ({
         id: `rec_${Date.now()}`,
         createdAt: new Date().toISOString(),
-        staffMember: form.staffMember,
+        staffMember: input.staffMember,
         participant: {
-          fullName: form.participantFullName,
-          dateOfBirth: form.participantDob,
-          age: form.participantAge,
-          gender: form.participantGender
+          fullName: input.participantFullName,
+          dateOfBirth: input.participantDob,
+          age: input.participantAge,
+          gender: input.participantGender
         },
         guardian: {
-          name: form.guardianName,
-          relationship: form.guardianRelationship,
-          phone: form.guardianPhone,
-          email: form.guardianEmail
+          name: input.guardianName,
+          relationship: input.guardianRelationship,
+          phone: input.guardianPhone,
+          email: input.guardianEmail
         },
         emergencyContact: {
-          name: form.emergencyName,
-          relationship: form.emergencyRelationship,
-          phone: form.emergencyPhone
+          name: input.emergencyName,
+          relationship: input.emergencyRelationship,
+          phone: input.emergencyPhone
         },
-        medicalFlags: form.medicalFlags,
-        goalsAndSportHistory: form.goalsAndSportHistory,
-        maturationReadinessNotes: form.maturationReadinessNotes,
+        medicalFlags: input.medicalFlags,
+        goalsAndSportHistory: input.goalsAndSportHistory,
+        maturationReadinessNotes: input.maturationReadinessNotes,
         movementScores: {
-          squat: form.movementSquat,
-          hinge: form.movementHinge,
-          push: form.movementPush,
-          pull: form.movementPull,
-          lunge: form.movementLunge,
-          brace: form.movementBrace,
-          landing: form.movementLanding
+          squat: input.movementSquat,
+          hinge: input.movementHinge,
+          push: input.movementPush,
+          pull: input.movementPull,
+          lunge: input.movementLunge,
+          brace: input.movementBrace,
+          landing: input.movementLanding
         },
-        attendanceConfidenceReadiness: form.attendanceConfidenceReadiness,
-        coachNotes: form.coachNotes
+        attendanceConfidenceReadiness: input.attendanceConfidenceReadiness,
+        coachNotes: input.coachNotes
       }),
-    [form]
+    []
   );
 
   const submit = async () => {
-    if (!validate()) return;
-    const record = toRecord();
-    await saveRecord(record);
-    setRecords((current) => [record, ...current]);
-    Alert.alert('Saved', 'Onboarding record saved successfully.');
-    setTab('records');
+    if (isSubmitting) return;
+    const validInput = validate();
+    if (!validInput) return;
+
+    setIsSubmitting(true);
+    try {
+      const record = toRecord(validInput);
+      await saveRecord(record);
+      setRecords((current) => [record, ...current]);
+      Alert.alert('Saved', 'Onboarding record saved successfully.');
+      setForm(initialState);
+      setTab('records');
+    } catch {
+      Alert.alert('Save failed', 'We could not save this record. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const generatePdf = async (record: OnboardingRecord) => {
-    const html = buildOnboardingPdfHtml(record);
-    const file = await Print.printToFileAsync({ html });
-    if (await Sharing.isAvailableAsync()) {
-      await Sharing.shareAsync(file.uri, { mimeType: 'application/pdf', dialogTitle: 'Share onboarding PDF' });
-    } else {
-      Alert.alert('PDF generated', `PDF created at ${file.uri}`);
+    if (pdfForRecordId === record.id) return;
+
+    setPdfForRecordId(record.id);
+    try {
+      const html = buildOnboardingPdfHtml(record);
+      const file = await Print.printToFileAsync({ html });
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(file.uri, { mimeType: 'application/pdf', dialogTitle: 'Share onboarding PDF' });
+      } else {
+        Alert.alert('PDF generated', `PDF created at ${file.uri}`);
+      }
+    } catch {
+      Alert.alert('PDF failed', 'Could not generate PDF. Please try again.');
+    } finally {
+      setPdfForRecordId(null);
     }
   };
 
@@ -213,8 +241,8 @@ export default function App() {
           <FormField label="Attendance/confidence/readiness notes" value={form.attendanceConfidenceReadiness} onChangeText={(v) => handleText('attendanceConfidenceReadiness', v)} multiline error={errors.attendanceConfidenceReadiness} />
           <FormField label="Coach notes" value={form.coachNotes} onChangeText={(v) => handleText('coachNotes', v)} multiline error={errors.coachNotes} />
 
-          <Pressable style={styles.saveButton} onPress={submit}>
-            <Text style={styles.saveText}>Save onboarding record</Text>
+          <Pressable style={[styles.saveButton, isSubmitting && styles.disabledButton]} onPress={submit} disabled={isSubmitting}>
+            <Text style={styles.saveText}>{isSubmitting ? 'Saving...' : 'Save onboarding record'}</Text>
           </Pressable>
         </ScrollView>
       ) : (
@@ -227,8 +255,12 @@ export default function App() {
                 <Text style={styles.cardTitle}>{record.participant.fullName}</Text>
                 <Text style={styles.cardSub}>{record.createdAt}</Text>
                 <Text style={styles.cardSub}>Coach: {record.staffMember}</Text>
-                <Pressable style={styles.pdfButton} onPress={() => generatePdf(record)}>
-                  <Text style={styles.pdfText}>Generate PDF summary</Text>
+                <Pressable
+                  style={[styles.pdfButton, pdfForRecordId === record.id && styles.disabledButton]}
+                  onPress={() => generatePdf(record)}
+                  disabled={pdfForRecordId === record.id}
+                >
+                  <Text style={styles.pdfText}>{pdfForRecordId === record.id ? 'Generating PDF...' : 'Generate PDF summary'}</Text>
                 </Pressable>
               </View>
             ))
@@ -267,5 +299,6 @@ const styles = StyleSheet.create({
   cardTitle: { fontWeight: '800', color: theme.colors.primary, fontSize: 16 },
   cardSub: { color: theme.colors.muted, marginTop: 2 },
   pdfButton: { marginTop: theme.spacing.sm, backgroundColor: theme.colors.accent, paddingVertical: 10, borderRadius: theme.radius.sm, alignItems: 'center' },
-  pdfText: { color: '#fff', fontWeight: '700' }
+  pdfText: { color: '#fff', fontWeight: '700' },
+  disabledButton: { opacity: 0.65 }
 });

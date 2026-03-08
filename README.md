@@ -159,3 +159,16 @@ I changed config to use **single-page web output** (no Expo Router required).
 5. Open your site URL again.
 
 If it still fails, send me the **first red error line** from the workflow and I will fix it quickly.
+
+
+## Reliability optimizations included
+- Stronger validation rules for onboarding data:
+  - trims whitespace
+  - enforces DOB format (`YYYY-MM-DD`)
+  - stricter phone pattern checks
+- Safer app behavior:
+  - save and PDF generation are guarded against double taps
+  - clear error alerts for load/save/PDF failures
+  - records are sorted newest-first on load
+- CI quality workflow added:
+  - lint + typecheck + tests on push/PR (`.github/workflows/quality-checks.yml`)
