@@ -83,3 +83,25 @@ npm run test
 
 ## Branding integration notes
 Add official brand image files under `assets/` (see `assets/branding/README.md`) and map them in `app.json` before release builds.
+
+## Simple GitHub preview setup (for beginners)
+If your deployed link opens GitHub instead of the app, follow these exact steps:
+
+1. Open your repository on GitHub.
+2. Click **Settings** → **Pages**.
+3. Under **Build and deployment**, set **Source** to **GitHub Actions**.
+4. Click **Actions** tab in the repository.
+5. You should see a workflow named **Deploy Web Preview (GitHub Pages)**.
+6. Click that workflow, then click **Run workflow**.
+7. Wait until both jobs are green (**build** and **deploy**).
+8. Go back to **Settings** → **Pages** and open the provided site URL.
+
+### If the workflow does not start
+1. Go to **Settings** → **Actions** → **General**.
+2. In **Actions permissions**, choose **Allow all actions and reusable workflows**.
+3. In **Workflow permissions**, choose **Read and write permissions**.
+4. Save.
+5. Re-run **Deploy Web Preview (GitHub Pages)** from the **Actions** tab.
+
+### If the workflow fails on install
+- This project depends on npm registry access. If your organization blocks npm packages, ask your admin to allow `registry.npmjs.org`.
