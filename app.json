@@ -21,6 +21,9 @@
     },
     "extra": {
       "brandLogoPath": "assets/branding/README.md"
+    },
+    "experiments": {
+      "baseUrl": "/Strength-School"
     }
   }
 }

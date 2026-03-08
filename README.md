@@ -121,3 +121,25 @@ That screen means GitHub cannot find a workflow file on your **default branch** 
 ### One-click checks
 - If Actions tab still shows "Choose a workflow", the workflow file is not on default branch yet.
 - If Actions runs but Pages link is blank, set **Settings → Pages → Source = GitHub Actions**.
+
+
+## Fix for `https://marvic907.github.io/Strength-School/` showing 404
+I added two fixes in code:
+1. GitHub Pages workflow now adds `404.html` fallback and `.nojekyll`.
+2. Expo web export now uses base URL `/Strength-School` for project-site hosting.
+
+### Simple steps to make it work
+1. Push latest code to GitHub.
+2. Go to **Actions** tab.
+3. Run **Deploy Web Preview (GitHub Pages)**.
+4. Wait until both jobs are green.
+5. Open: `https://marvic907.github.io/Strength-School/`
+
+### If it still shows 404
+1. Go to **Settings → Pages**.
+2. Confirm **Source = GitHub Actions**.
+3. Open latest workflow run logs and confirm:
+   - `Export Expo web build` passed
+   - `Upload Pages artifact` passed
+   - `Deploy to GitHub Pages` passed
+4. Hard refresh browser (`Ctrl+Shift+R` / `Cmd+Shift+R`).
