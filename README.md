@@ -89,11 +89,11 @@ If your deployed link opens GitHub instead of the app, follow these exact steps:
 
 1. Open your repository on GitHub.
 2. Click **Settings** → **Pages**.
-3. Under **Build and deployment**, set **Source** to **GitHub Actions**.
+3. Under **Build and deployment**, set **Source** to **Deploy from a branch**.
 4. Click **Actions** tab in the repository.
 5. You should see a workflow named **Deploy Web Preview (GitHub Pages)**.
 6. Click that workflow, then click **Run workflow**.
-7. Wait until both jobs are green (**build** and **deploy**).
+7. Wait until the **deploy** job is green.
 8. Go back to **Settings** → **Pages** and open the provided site URL.
 
 ### If the workflow does not start
@@ -120,7 +120,7 @@ That screen means GitHub cannot find a workflow file on your **default branch** 
 
 ### One-click checks
 - If Actions tab still shows "Choose a workflow", the workflow file is not on default branch yet.
-- If Actions runs but Pages link is blank, set **Settings → Pages → Source = GitHub Actions**.
+- If Actions runs but Pages link is blank, set **Settings → Pages → Source = Deploy from a branch**, branch **gh-pages** and folder **/(root)**.
 
 
 ## Fix for `https://marvic907.github.io/Strength-School/` showing 404
@@ -132,16 +132,15 @@ I added two fixes in code:
 1. Push latest code to GitHub.
 2. Go to **Actions** tab.
 3. Run **Deploy Web Preview (GitHub Pages)**.
-4. Wait until both jobs are green.
+4. Wait until the **deploy** job is green.
 5. Open: `https://marvic907.github.io/Strength-School/`
 
 ### If it still shows 404
 1. Go to **Settings → Pages**.
-2. Confirm **Source = GitHub Actions**.
+2. Confirm **Source = Deploy from a branch**.
 3. Open latest workflow run logs and confirm:
    - `Export Expo web build` passed
-   - `Upload Pages artifact` passed
-   - `Deploy to GitHub Pages` passed
+   - `Deploy to gh-pages branch` passed
 4. Hard refresh browser (`Ctrl+Shift+R` / `Cmd+Shift+R`).
 
 - If workflow shows missing web dependencies, ensure `react-native-web`, `react-dom`, and `@expo/metro-runtime` are present in `package.json` (already included in this repo).
