@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Strength School Onboarding",
+    "slug": "strength-school-onboarding",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "mt.strengthschool.onboarding"
+    },
+    "android": {
+      "package": "mt.strengthschool.onboarding"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "extra": {
+      "brandLogoPath": "assets/branding/README.md"
+    }
+  }
+}
