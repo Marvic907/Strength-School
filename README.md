@@ -145,3 +145,18 @@ I added two fixes in code:
 4. Hard refresh browser (`Ctrl+Shift+R` / `Cmd+Shift+R`).
 
 - If workflow shows missing web dependencies, ensure `react-native-web`, `react-dom`, and `@expo/metro-runtime` are present in `package.json` (already included in this repo).
+
+
+### Fix for error: `expo-router/node/render.js could not be found`
+This happens because Expo static rendering was being used during export.
+
+I changed config to use **single-page web output** (no Expo Router required).
+
+#### Simple steps
+1. Push latest code.
+2. Go to **Actions**.
+3. Run **Deploy Web Preview (GitHub Pages)**.
+4. Wait for green checks.
+5. Open your site URL again.
+
+If it still fails, send me the **first red error line** from the workflow and I will fix it quickly.
